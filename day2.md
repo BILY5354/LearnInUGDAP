@@ -1,4 +1,7 @@
+
+
 # [第二天](./day2.md)
+
 1. [上午](#1)
 2. [下午](#2)
 3. [](#3)
@@ -285,15 +288,50 @@ public class PlayerController : MonoBehaviour
 
 - 一个小方块弄好了，其它的也同理，最后新建一个empty把这12个小球全部放进去，完整的代码看最后部分
 
-![](img_day2/2_0_.PNG)
+
 
 ### 2.4 设置UI
 
+- 
 
+<img src="img_day2/2_10.PNG" style="zoom:80%;" />
+
+- 
+
+<img src="img_day2/2_11.PNG" style="zoom:60%;" />
+
+- 
+
+```c#
+public class PlayerController : MonoBehaviour
+{
+    //Rigidbody  刚体 来实现移动
+    private Rigidbody rb;
+    public float speed;
+
+    public GameObject countTextObj;//加载分数显示
+    public GameObject winTextObj;//加载分数显示
+    int count;
+}
+```
+
+- 
+
+<img src="img_day2/2_12.PNG" style="zoom:80%;" />
+
+- as1
+
+<img src="img_day2/2_13.PNG" style="zoom:80%;" />
 
 ### 2.5 程序打包
 
+- as1
 
+<img src="img_day2/2_14.PNG" style="zoom:80%;" />
+
+- 
+
+<img src="img_day2/2_15.PNG" style="zoom:60%;" />
 
 ### 2.6 下午代码(总)
 
