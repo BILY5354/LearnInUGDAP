@@ -58,11 +58,7 @@ _上午_，制作一个会移动的小球。
 ![](img_day2/1_8.PNG)
 
 - 然后再双击该脚本本件PlayerController进入VS打代码。
-- 如果一切无误的话，此时点击下图运行就可以通过wasd操作小球了。
-
-
-
-
+- 如果一切无误的话，此时点击下图运行就可以通过wasd操作小球了。  
 
 ### 1.4 上午代码
 
@@ -108,7 +104,23 @@ _下午_，完成小球的关卡（吃掉12个方块游戏胜利）。
 
 ### 2.1 使小球更好移动并设置墙壁防止小球掉出边界
 
-- 早上的代码中，是怎么知道GetAxis的参数是Horizontal呢？其实不管是Horizontal或者Vertical这些是有设定的。点击File->Project Setting -> Input发现有Axes属性，里面的参数正有Horizontal和Vertical。**所以这里的属性是需要对应的**，如果将Vertical修改成MyVertical那么在代码中也要换成对应名字。
+- 首先弄四个墙壁在边上，这样就不会掉到外边了
+
+<img src="img_day2/2_0_0.PNG" style="zoom:80%;" />
+
+- 调好参数后，快速复制
+
+<img src="img_day2/2_0_1.PNG" style="zoom:80%;" />
+
+- 之后发现这四个墙除了防止小球掉下去外没什么用，而且在Hierachy界面又占地方，此时可以新建一个空实体把四个墙放进去
+
+<img src="img_day2/2_0_2.PNG" style="zoom:80%;" />
+
+- 最终效果如下，界面干净整洁
+
+![](img_day2/2_0_3.PNG)
+
+- 早上的代码中，是怎么知道GetAxis的参数是Horizontal呢？其实不管是Horizontal或者Vertical这些是有设定的。点击File->Project Setting -> Input发现有Axes属性，里面的参数正有Horizontal和Vertical。**所以这里的属性是一一对应的**，如果将Vertical修改成MyVertical那么在代码中也要换成对应名字。
 
 ```c#
  movement.x = Input.GetAxis("Horizontal");
@@ -116,27 +128,172 @@ _下午_，完成小球的关卡（吃掉12个方块游戏胜利）。
 
 ![](img_day2/2_1.PNG)
 
-- 如果要新增一个交互键，同样也在这里修改。
+- 此外，还可以注意到Horizontal属性是只有正反馈和负反馈的(Negative)，也就是Horizontal只能控制左右，如果需要前后的话就需要控制另一个属性。**最终水平方向、垂直方向的共同作用下实现二维的运动**。如果要新增一个交互键，同样也在这里修改(课后练习)。
 
-- 因为使用了Rigidbody，所以小球是有惯性移动的，为了更好的移动可以在PlayerController定义一个```public float speed;```这时候再到Unity看，发现多了一个Speed属性，这样就可以让策划小伙伴帮忙调试了。
+- 因为使用了Rigidbody，所以小球是有惯性移动的，为了更好的移动可以在PlayerController定义一个```public float speed;```这时候再到Unity看，发现多了一个Speed属性，这样就可以让策划小伙伴帮忙调试了。_如果speed没有设置成public是不会显示的，如果speed没有设值，默认为0小球也不会移动_。
 
 <img src="img_day2/2_2.PNG" style="zoom:80%;" />
 
-- 这时候再移动会发现稍微好了一些
+- 这时候再移动会发现稍微好了一些，并且小球也不会掉落出去
 
 
 
 ### 2.2 设置相机跟随
 
+- 首先把相机调到一个合适的位置(用玩家视角Game)查看，可以直接调参数
+
+<img src="img_day2/2_3.PNG" style="zoom:60%;" />
+
+- 然后新建一个脚文(命名为CameraController)用于相机的控制
+
+  ```c#
+  using System.Collections;
+  using System.Collections.Generic;
+  using UnityEngine;
+  using UnityEngine.UI;
+  
+  public class PlayerController : MonoBehaviour
+  {
+      //Rigidbody  刚体 来实现移动
+      private Rigidbody rb;
+      public float speed;
+  
+      public GameObject countTextObj;//加载分数显示
+      public GameObject winTextObj;//加载分数显示
+      int count;
+  
+      // Start is called before the first frame update
+      void Start()
+      {
+          rb = GetComponent<Rigidbody>();
+          count = 0;
+          Update();
+          winTextObj.GetComponent<Text>().text = "";
+      }
+  
+      // Update is called once per frame
+      void Update()
+      {
+          Vector3 movement;
+  
+          movement.x = Input.GetAxis("Horizontal");
+          movement.y = 0;//使不能跳
+          movement.z = Input.GetAxis("Vertical");//前后
+          rb.AddForce(movement* speed);
+      }
+  
+      /**
+       OnTriggerEnter可以很有用，
+       */
+      private void OnTriggerEnter(Collider other)
+      {
+          /*Debug.Log("Player 碰到了" +other.gameObject.name);*/
+          if(other.gameObject.CompareTag("PickUp"))
+          {
+              other.gameObject.SetActive(false);
+              count++;
+              UpdateText();
+              if(count >= 12)
+              {
+                  winTextObj.GetComponent<Text>().text = "You Win";
+              }
+          }        
+      }
+  
+      void UpdateText() 
+      {
+          countTextObj.GetComponent<Text>().text = "Count:" + count.ToString();
+      }
+  }
+  
+  ```
+
+  - 和小球一样，拖动改脚本到相机的Inspector中，**留意是相机的Inspector**
+
+  <img src="img_day2/2_4.PNG" style="zoom:60%;" />
+
+  - 这时候运行，会发现相机视角会跟随小球移动了
+
 ### 2.3 设置方块
 
-![](img_day2/.PNG)
+- 因为小方块是实体便设置成Cude并设置好对应的材料颜色
+
+<img src="img_day2/2_5.PNG" style="zoom:60%;" />
+
+- 现在边做边想，小方块这么小一个，可能会在其它项目会用到呢(还记得早上的prefab文件夹吗)，这时候就可以把这个方块拖动到Project界面，点击发现是以prefab为后缀的。如果以后想用，直接复制这个过去即可，方便多了。
+
+<img src="img_day2/2_6.PNG" style="zoom:60%;" />
+
+- 可以为小球设置标签，标签用途一会说到
+
+<img src="img_day2/2_7.PNG" style="zoom:60%;" />
+
+- 新建标签命名为pickup，和小方块同名，标签作用一目了然
+
+<img src="img_day2/2_8.PNG" style="zoom:60%;" />
+
+- 在Inspector中有Box Collider属性可以试着反选后操作下小球，这时候发现小球竟然会穿过小方块。所以可以知道如果反选Box Collider，这个小方块便可被小球穿过。
+- 我们重新选择Box Collider然后再勾选Is Trigger发现此时小球又可以穿过小方块，那么这个和Box Collider有什么不同呢？实际上Is Trigger是当该物体被检测到碰撞时，便会发送信息，这时候便可以在脚本中设置代码了。比如当小球撞到方块时，改方块就消失
+
+<img src="img_day2/2_9.PNG" style="zoom:60%;" />
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    //Rigidbody  刚体 来实现移动
+    private Rigidbody rb;
+    public float speed;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        Update();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Vector3 movement;
+
+        movement.x = Input.GetAxis("Horizontal");
+        movement.y = 0;//使不能跳
+        movement.z = Input.GetAxis("Vertical");//前后
+        rb.AddForce(movement* speed);
+    }
+
+    /**
+     OnTriggerEnter可以很有用，
+     */
+    private void OnTriggerEnter(Collider other)
+    {
+        /*Debug.Log("Player 碰到了" +other.gameObject.name);*/
+        if(other.gameObject.CompareTag("PickUp"))
+        {
+            other.gameObject.SetActive(false);
+        }        
+    }
+}
+
+```
 
 
+
+- 一个小方块弄好了，其它的也同理，最后新建一个empty把这12个小球全部放进去，完整的代码看最后部分
+
+![](img_day2/2_0_.PNG)
 
 ### 2.4 设置UI
 
+
+
 ### 2.5 程序打包
+
+
 
 ### 2.6 下午代码(总)
 
@@ -233,12 +390,4 @@ public class CameraController : MonoBehaviour
 
 ```
 
-
-
-## 3
-
-```
-```
-## 4
-```
-```
+第二天的课程便告一段落了
